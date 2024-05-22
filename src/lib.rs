@@ -137,6 +137,7 @@ fn verify_best_player(player: Player, poker_game: Poker) -> bool {
 
 #[cfg(test)]
 mod test {
+  use sp_core::crypto::UncheckedInto;
   use super::*;
 
   #[test]
@@ -174,7 +175,7 @@ mod test {
     generate_input(&mut game);
     draw_card(&mut game);
     let best = find_best_player(&game.players);
-    dbg!(best.random_number.unwrap());
+    verify_best_player(best.clone(), game);
   }
 
   #[test]
