@@ -115,10 +115,12 @@ fn find_best_player(all_players: &Vec<Player>) -> &Player {
   best_player.expect("There should be at least one player with a drawn card")
 }
 
-fn verify_best_player(player: Player, signing_context: &SigningContext, msg: &[u8]) -> bool {
-  let signing_tx = signing_context.bytes(msg);
+fn verify_best_player(player: Player, poker_game: Poker) -> bool {
+  let msg = poker_game.input.unwrap().to_le_bytes();
+  let signing_tx = poker_game.signing_ctx.bytes(&msg);
   let pre_out = player.drawed_card.as_ref().unwrap().0.to_preout();
   let out = &player.drawed_card.as_ref().unwrap().0;
+
   let proof = &player.drawed_card.as_ref().unwrap().1;
   let proof_batchable = &player.drawed_card.as_ref().unwrap().2;
 
@@ -183,15 +185,35 @@ mod test {
     assert!(best_player.drawed_card.is_some());
   }
 
-  // write a test that will test the verify_best_player
   #[test]
-  fn test_verify_best_player() {
-    // let mut players = generate_key_pairs(4);
-    // draw_card(&mut players);
-    // let player = &players[0];
-    // let signing_context = signing_context(b"Poker Game!");
-    // let msg = b"I played";
-    // let result = verify_best_player(player.clone(), &signing_context, msg);
-    // assert_eq!(result, true);
+  fn test_verify_best_player_when_valid() {
+    let player = Player::new();
+    let player_2 = Player::new();
+    let player_3 = Player::new();
+
+    let mut game = Poker::new(
+      vec![player.clone(), player_2.clone(), player_3.clone()],
+      Some(32),
+    );
+    draw_card(&mut game);
+    let best_player = find_best_player(&game.players);
+    let best_player_is_truthy = verify_best_player(best_player.clone(), game);
+    assert!(best_player_is_truthy);
+  }
+
+  #[test]
+    #[ignore = "fix later"]
+  fn test_verify_best_player_when_invalid() {
+    let player = Player::new();
+    let player_2 = Player::new();
+    let player_3 = Player::new();
+
+    let mut game = Poker::new(
+      vec![player.clone(), player_2.clone(), player_3.clone()],
+      Some(32),
+    );
+    draw_card(&mut game);
+    let not_truthy = verify_best_player(player_3, game);
+    assert!(!not_truthy);
   }
 }
