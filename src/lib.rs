@@ -29,8 +29,12 @@ fn generate_key_pairs(number_of_players: u8) -> Vec<Player> {
 // 2. Take turn and draw card [x 5] for later
 //   - VRF -> output % 52 = card number
 //   - sign
-fn draw_card(mut player: &Vec<Player>) {
-  todo!("here we assign random value to the field `drawed_card`")
+fn draw_card(players: &mut Vec<Player>) {
+  let ctx = signing_context(b"Poker Game!");
+
+  for one in players {
+    one.drawed_card = Some(one.key.vrf_sign(ctx.bytes(b"I played")));
+  }
 }
 
 // 4. Determine the best output
