@@ -104,11 +104,7 @@ fn verify_best_player(player: Player, poker_game: Poker) -> bool {
     .vrf_verify(signing_tx, &pre_out, &proof)
     .expect("failed to verify");
 
-  if (&io == out) && (proof_batchable == &proof_result) {
-    true
-  } else {
-    false
-  }
+  io.eq(out) && proof_batchable.eq(&proof_result)
 }
 
 #[cfg(test)]
@@ -141,12 +137,17 @@ mod test {
   }
   #[test]
   fn test_find_best_player() {
-    let mut players = generate_key_pairs(4);
-    let mut game = Poker::new(players.clone(), Some(32));
 
-    draw_card(&mut game);
-    let best_player = find_best_player(&players);
-    assert!(best_player.drawed_card.is_some());
+        let player = Player::new();
+        let player_2 = Player::new();
+        let player_3 = Player::new();
+        let mut game = Poker::new(
+          vec![player.clone(), player_2.clone(), player_3.clone()],
+          Some(32),
+        );
+        draw_card(&mut game);
+        let best_player = find_best_player(&game.players);
+        assert_eq!(best_player.proof, player.proof);
   }
 
   #[test]
@@ -166,7 +167,7 @@ mod test {
   }
 
   #[test]
-    #[ignore = "fix later"]
+  #[ignore = "fix later"]
   fn test_verify_best_player_when_invalid() {
     let player = Player::new();
     let player_2 = Player::new();
