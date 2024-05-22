@@ -137,7 +137,7 @@ mod test {
   fn test_verify_best_player() {
     let mut players = generate_key_pairs(4);
     draw_card(&mut players);
-    let player = &players[0];
+    let player = players.get(0).unwrap();
     let signing_context = signing_context(b"Poker Game!");
     let msg = b"I played";
     let result = verify_best_player(player.clone(), &signing_context, msg);
