@@ -4,19 +4,26 @@ use schnorrkel::{
 };
 type DrawCardResult = (VRFInOut, VRFProof, VRFProofBatchable);
 
+#[derive(Debug)]
 struct Player {
-  drawed_card: Option<DrawCardResult>,
-  key: Keypair,
+  pub drawed_card: Option<DrawCardResult>,
+  pub key: Keypair,
 }
 
 // 1. Generate key pairs for each players
 fn generate_key_pairs(number_of_players: u8) -> Vec<Player> {
-  let change_me = Keypair::generate();
-  // TODO: please change me
-  vec![Player {
-    drawed_card: None,
-    key: change_me,
-  }]
+  let mut players: Vec<Player> = Vec::with_capacity(number_of_players.into());
+
+  for _ in 0..number_of_players {
+    let key = Keypair::generate();
+    println!("{:?}", &key.public);
+    let player = Player {
+      drawed_card: None,
+      key,
+    };
+    players.push(player);
+  }
+  players
 }
 
 // 2. Take turn and draw card [x 5] for later
@@ -42,6 +49,12 @@ fn verify_best_player(player: Player) -> bool {
 #[cfg(test)]
 mod test {
   use super::*;
+
+  #[test]
+  fn test_generate_key_pairs() {
+    let players = generate_key_pairs(4);
+    assert_eq!(players.len(), 4);
+  }
 
   #[test]
   fn play_poker() {
