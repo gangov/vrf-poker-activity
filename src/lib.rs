@@ -133,6 +133,13 @@ mod test {
     // 3. Take turn and commit the output [do it inside for loop]
     // 5. Find the winner from the output
   }
+  #[test]
+  fn test_find_best_player() {
+    let mut players = generate_key_pairs(4);
+    draw_card(&mut players);
+    let best_player = find_best_player(&players);
+    assert!(best_player.drawed_card.is_some());
+   }
 
   // write a test that will test the verify_best_player
   #[test]
