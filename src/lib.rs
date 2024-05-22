@@ -105,6 +105,8 @@ fn find_best_player(all_players: &Vec<Player>) -> &Player {
       let card_sum: u32 = card_bytes.iter().map(|&b| b as u32).sum();
       let card_value = card_sum % 52;
 
+      // TODO if the best card value is more than one
+      //      we should announce that more than 2 players won the game
       if card_value > highest_card_value {
         highest_card_value = card_value;
         best_player = Some(player);
@@ -171,10 +173,14 @@ mod test {
 
   #[test]
   fn play_poker() {
-    let player = Keypair::generate();
-    // 3. Take turn and commit the output [do it inside for loop]
-    // 5. Find the winner from the output
+    let mut players = generate_key_pairs(4);
+    let mut game = Poker::new(players.clone(), None);
+    generate_input(&mut game);
+    draw_card(&mut game);
+    let best = find_best_player(&game.players);
+    dbg!(best.random_number.unwrap());
   }
+
   #[test]
   fn test_find_best_player() {
     let mut players = generate_key_pairs(4);
