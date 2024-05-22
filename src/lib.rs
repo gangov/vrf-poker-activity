@@ -1,4 +1,8 @@
+use std::io::Read;
+
+use merlin::Transcript;
 use schnorrkel::{
+  context::SigningContext,
   vrf::{VRFInOut, VRFProof, VRFProofBatchable},
   *,
 };
@@ -42,14 +46,24 @@ fn find_best_player(all_players: &Vec<Player>) -> Player {
   todo!()
 }
 
-fn verify_best_player(player: Player) -> bool {
-  // 1. get the output from the player
-   
+fn verify_best_player(player: Player, signing_context: &SigningContext, msg: &[u8]) -> bool {
+  let signing_tx = signing_context.bytes(msg);
+  let pre_out = player.drawed_card.as_ref().unwrap().0.to_preout();
+  let out = &player.drawed_card.as_ref().unwrap().0;
+  let proof = &player.drawed_card.as_ref().unwrap().1;
+  let proof_batchable = &player.drawed_card.as_ref().unwrap().2;
 
-  // 2. get the proof from the player
-  // 3. verify the output using the proof
-  // 4. return the result
+  let (io, proof_result) = player
+    .key
+    .public
+    .vrf_verify(signing_tx, &pre_out, &proof)
+    .expect("failed to verify");
+
+  if (&io == out) && (proof_batchable == &proof_result) {
+    true
+  } else {
     false
+  }
 }
 
 #[cfg(test)]
@@ -78,4 +92,16 @@ mod test {
     // 3. Take turn and commit the output [do it inside for loop]
     // 5. Find the winner from the output
   }
+
+    // write a test that will test the verify_best_player
+    #[test]
+    fn test_verify_best_player() {
+      let mut players = generate_key_pairs(4);
+      draw_card(&mut players);
+      let player = &players[0];
+      let signing_context = signing_context(b"Poker Game!");
+      let msg = b"I played";
+      let result = verify_best_player(player.clone(), &signing_context, msg);
+      assert_eq!(result, true);
+    }
 }

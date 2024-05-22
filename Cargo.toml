@@ -9,3 +9,4 @@ authors = ["Kaloyan <gangov1@gmail.com>", "Archana <archanav1929@gmail.com>"]
 
 [dependencies]
 schnorrkel = "0.11.4"
+merlin = "3.0.0"
