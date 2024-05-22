@@ -8,10 +8,32 @@ use schnorrkel::{
 };
 type DrawCardResult = (VRFInOut, VRFProof, VRFProofBatchable);
 
+struct Poker {
+  players: Vec<Player>,
+  input: Option<u32>,
+  signing_ctx: SigningContext,
+}
+
+impl Poker {}
+
 #[derive(Debug, Clone)]
 struct Player {
+  pub random_numer: Option<u32>,
+  pub proof: Option<[u8; 32]>,
   pub drawed_card: Option<DrawCardResult>,
   pub key: Keypair,
+}
+
+impl Player {
+  fn new() -> Self {
+    let key = Keypair::generate();
+    Self {
+      drawed_card: None,
+      key,
+      random_numer: None,
+      proof: None,
+    }
+  }
 }
 
 // 1. Generate key pairs for each players
@@ -19,13 +41,7 @@ fn generate_key_pairs(number_of_players: u8) -> Vec<Player> {
   let mut players: Vec<Player> = Vec::with_capacity(number_of_players.into());
 
   for _ in 0..number_of_players {
-    let key = Keypair::generate();
-    println!("{:?}", &key.public);
-    let player = Player {
-      drawed_card: None,
-      key,
-    };
-    players.push(player);
+    players.push(Player::new());
   }
   players
 }
