@@ -175,7 +175,7 @@ mod test {
     generate_input(&mut game);
     draw_card(&mut game);
     let best = find_best_player(&game.players);
-    verify_best_player(best.clone(), game);
+    assert!(verify_best_player(best.clone(), game), "Should be the best player");
   }
 
   #[test]
