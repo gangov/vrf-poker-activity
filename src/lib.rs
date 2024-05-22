@@ -32,7 +32,7 @@ fn find_best_player(all_players: &Vec<Player>) -> Player {
 }
 
 fn verify_best_player(player: Player) -> bool {
-    todo!()
+  todo!()
 }
 
 #[cfg(test)]
