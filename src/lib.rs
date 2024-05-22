@@ -57,6 +57,16 @@ mod test {
   }
 
   #[test]
+  fn test_draw_card() {
+    let mut players = generate_key_pairs(4);
+    draw_card(&mut players);
+
+    for player in players {
+      assert!(player.drawed_card.is_some(), "Should be present")
+    }
+  }
+
+  #[test]
   fn play_poker() {
     let player = Keypair::generate();
     // 3. Take turn and commit the output [do it inside for loop]
