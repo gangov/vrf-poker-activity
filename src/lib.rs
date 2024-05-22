@@ -1,20 +1,23 @@
 use std::io::Read;
+use rand::Rng;
 
 use schnorrkel::{
   context::SigningContext,
   vrf::{VRFInOut, VRFProof, VRFProofBatchable},
   *,
 };
+use sp_core::blake2_256;
+
 type DrawCardResult = (VRFInOut, VRFProof, VRFProofBatchable);
 
 struct Poker {
   players: Vec<Player>,
-  input: Option<u32>,
+  input: Option<u64>,
   signing_ctx: SigningContext,
 }
 
 impl Poker {
-  fn new(players: Vec<Player>, input: Option<u32>) -> Self {
+  fn new(players: Vec<Player>, input: Option<u64>) -> Self {
     Poker {
       players,
       input,
@@ -25,7 +28,7 @@ impl Poker {
 
 #[derive(Debug, Clone)]
 struct Player {
-  pub random_numer: Option<u32>,
+  pub random_number: Option<u32>,
   pub proof: Option<[u8; 32]>,
   pub drawed_card: Option<DrawCardResult>,
   pub key: Keypair,
@@ -35,10 +38,10 @@ impl Player {
   fn new() -> Self {
     let key = Keypair::generate();
     Self {
+      random_number: None,
+      proof: None,
       drawed_card: None,
       key,
-      random_numer: None,
-      proof: None,
     }
   }
 }
@@ -51,6 +54,33 @@ fn generate_key_pairs(number_of_players: u8) -> Vec<Player> {
     players.push(Player::new());
   }
   players
+}
+
+fn generate_input(game: &mut Poker) {
+  let mut rng = rand::thread_rng();
+
+  // generate random number for all players & commit the hash for each random number
+  for player in &mut game.players {
+    let random_numer: u32 = rng.gen();
+    player.random_number = Some(random_numer);
+    player.proof = Some(blake2_256(&random_numer.to_le_bytes()));
+  }
+
+
+  // verify that all random number are correct
+  // This is just to simulate the step
+  // In reality, we would want to share the random number to each player
+  // and have them verify the proof/hash themselves
+  for player in &mut game.players {
+    let calculated_hash = blake2_256(&player.random_number.unwrap().to_le_bytes());
+    if !calculated_hash.eq(&player.proof.unwrap()) {
+      panic!("Cheat detected!")
+    }
+  }
+
+  let sum = game.players.iter().fold(0u64, |acc, x| acc + x.random_number.unwrap() as u64);
+
+  game.input = Some(sum);
 }
 
 // 2. Take turn and draw card [x 5] for later
@@ -106,8 +136,7 @@ fn verify_best_player(player: Player, signing_context: &SigningContext, msg: &[u
 }
 
 #[cfg(test)]
-mod test {
-  use super::*;
+mod test { use super::*;
 
   #[test]
   fn test_generate_key_pairs() {
@@ -128,6 +157,16 @@ mod test {
   }
 
   #[test]
+  fn verify_input() {
+    let players = generate_key_pairs(4);
+    let mut game = Poker::new(players, None);
+    generate_input(&mut game);
+
+    assert!(game.input.is_some());
+    println!("{:?}", game.input.unwrap());
+  }
+
+  #[test]
   fn play_poker() {
     let player = Keypair::generate();
     // 3. Take turn and commit the output [do it inside for loop]
@@ -136,7 +175,7 @@ mod test {
   #[test]
   fn test_find_best_player() {
     let mut players = generate_key_pairs(4);
-    draw_card(&mut players);
+    // draw_card(&mut playersßßΩΩs);
     let best_player = find_best_player(&players);
     assert!(best_player.drawed_card.is_some());
    }

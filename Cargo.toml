@@ -10,3 +10,8 @@ authors = ["Kaloyan <gangov1@gmail.com>", "Archana <archanav1929@gmail.com>"]
 [dependencies]
 schnorrkel = "0.11.4"
 merlin = "3.0.0"
+rand = "0.8.5"
+sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.42", features = [
+    "full_crypto",
+    "std",
+] }
