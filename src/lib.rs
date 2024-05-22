@@ -16,18 +16,24 @@ struct Poker {
 
 impl Poker {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Player {
-  random_numer: Option<u32>,
-  proof: Option<[u8; 32]>,
+  pub random_numer: Option<u32>,
+  pub proof: Option<[u8; 32]>,
   pub drawed_card: Option<DrawCardResult>,
-  key: Keypair,
+  pub key: Keypair,
 }
 
 impl Player {
-  // fn new() -> Self {
-
-  // }
+  fn new() -> Self {
+    let key = Keypair::generate();
+    Self {
+      drawed_card: None,
+      key,
+      random_numer: None,
+      proof: None,
+    }
+  }
 }
 
 // 1. Generate key pairs for each players
@@ -35,15 +41,7 @@ fn generate_key_pairs(number_of_players: u8) -> Vec<Player> {
   let mut players: Vec<Player> = Vec::with_capacity(number_of_players.into());
 
   for _ in 0..number_of_players {
-    let key = Keypair::generate();
-    println!("{:?}", &key.public);
-    let player = Player {
-      drawed_card: None,
-      key,
-      random_numer: None,
-      proof: None,
-    };
-    players.push(player);
+    players.push(Player::new());
   }
   players
 }
@@ -111,15 +109,15 @@ mod test {
     // 5. Find the winner from the output
   }
 
-    // write a test that will test the verify_best_player
-    #[test]
-    fn test_verify_best_player() {
-      let mut players = generate_key_pairs(4);
-      draw_card(&mut players);
-      let player = &players[0];
-      let signing_context = signing_context(b"Poker Game!");
-      let msg = b"I played";
-      let result = verify_best_player(player.clone(), &signing_context, msg);
-      assert_eq!(result, true);
-    }
+  // write a test that will test the verify_best_player
+  #[test]
+  fn test_verify_best_player() {
+    let mut players = generate_key_pairs(4);
+    draw_card(&mut players);
+    let player = &players[0];
+    let signing_context = signing_context(b"Poker Game!");
+    let msg = b"I played";
+    let result = verify_best_player(player.clone(), &signing_context, msg);
+    assert_eq!(result, true);
+  }
 }
